@@ -39,20 +39,17 @@ jobs:
         CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
       run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP"
 
-    # Run a terraform fmt for push and PR on non-main branch
+    # Run a terraform fmt
     - name: Terraform Format
       id: fmt
-      if: github.ref != 'refs/heads/main'
       run: terraform fmt -check
 
     # Run a terraform validate for push and PR on non-main branch
     # Run even if formatting fails
     - name: Terraform Validate
       id: validate
-      if: github.ref != 'refs/heads/main' && (success() || failure())
       run: terraform validate -no-color
 
-    # Run a terraform plan for pull requests only
     - name: Terraform Plan
       id: plan
       env:
@@ -60,12 +57,10 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      if: github.event_name == 'pull_request'
       run: terraform plan -no-color
 
     # Run Checkov against configuration
     - name: Checkov
-      if: github.event_name == 'pull_request'
       id: checkov
       uses: bridgecrewio/checkov-action@master
       with:
@@ -80,7 +75,6 @@ jobs:
     - name: add-plan-comment
       id: comment
       uses: actions/github-script@v3
-      if: github.event_name == 'pull_request' && (success() || failure())
       env:
         PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
       with:
@@ -113,7 +107,7 @@ jobs:
 
       # On push to main, build or change infrastructure according to Terraform configuration files
     - name: Terraform Apply
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      if: github.ref == 'refs/heads/main' && github.event_name == 'pull' && github.event_type == 'closed'
       env:
         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
