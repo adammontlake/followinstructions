@@ -12,18 +12,9 @@ provider "azurerm" {
 }
 
 locals {
-  # default values for setting up the environment
-  module_tag = {
-    "module"    = "launchpad"
-    "managedby" = "terraform"
-  }
-  tags             = merge(local.module_tag)
-  location         = "eastus"
   environment      = "production"
   service_name     = "terraform"
-  location-int     = "eastus"
-  environment-int  = "integration"
-  service_name-int = "terraform"
+  account_tier     = "Standard"
 }
 
 data "azurerm_resource_group" "rg" {
@@ -32,10 +23,10 @@ data "azurerm_resource_group" "rg" {
 
 module "storage_module" {
   source                  = "git::https://github.com/adammontlake/IaC-TF-pipe-demo.git//IaC/modules/storage"
-  service_name            = "terraform"
+  service_name            = local.service_name
   resource_group_name     = data.azurerm_resource_group.rg.name
   location                = data.azurerm_resource_group.rg.location
-  account_tier            = "Standard"
+  account_tier            = local.account_tier
   environment             = local.environment
   terraform_state_storage = false
   tags = {
