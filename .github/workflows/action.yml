@@ -85,10 +85,17 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-          #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
+          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+          #### Terraform Validation 🤖\`${{ steps.validate.outputs.stdout }}
           #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-          #### Checkov 🧪\`${{ steps.checkov.outcome }}\`
+          #### Checkov 🧪\`${{ steps.checkov.outcome }}\`\`*`;
+          
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })
 
       # On push to main, build or change infrastructure according to Terraform configuration files
     - name: Terraform Apply
