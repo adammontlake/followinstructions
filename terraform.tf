@@ -12,9 +12,9 @@ provider "azurerm" {
 }
 
 locals {
-  environment      = "production"
-  service_name     = "terraform"
-  account_tier     = "Standard"
+  environment  = "production"
+  service_name = "terraform"
+  account_tier = "Standard"
 }
 
 data "azurerm_resource_group" "rg" {
