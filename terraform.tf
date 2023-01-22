@@ -12,16 +12,16 @@ provider "azurerm" {
 }
 
 locals {
-  environment  = "production"
-  service_name = "terraform"
-  account_tier = "Standard"
+  environment              = "production"
+  service_name             = "terraform"
+  account_tier             = "Standard"
   account_replication_type = "GRS"
 }
 
 resource "random_string" "random_suffix" {
-  length   = 4
-  special  = false
-  upper    = false
+  length  = 4
+  special = false
+  upper   = false
 }
 
 data "azurerm_resource_group" "rg" {
