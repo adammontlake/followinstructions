@@ -21,6 +21,7 @@ data "azurerm_resource_group" "rg" {
   name = "IaC_pipelines_rg"
 }
 
+# Module to create a storage account with website
 module "storage_module" {
   source                  = "git::https://github.com/adammontlake/IaC-TF-pipe-demo.git//IaC/modules/storage"
   service_name            = local.service_name
