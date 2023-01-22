@@ -77,19 +77,21 @@ jobs:
     
     # Add a comment to pull requests with plan results
     - name: add-plan-comment
-      id: comment
+      id: comment_before_deployment
       uses: actions/github-script@v3
-      if: github.event_name == 'pull_request'
+      if: github.event_name == 'pull_request' && (success() || failure())
       env:
         PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ secrets.GH_TOKEN }}
         script: |
           const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-          #### Terraform Validation 🤖\`${{ steps.validate.outputs.stdout }}
+          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+          #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
           #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-          #### Checkov 🧪\`${{ steps.checkov.outcome }}\`\`*`;
-          
+          #### Checkov 🧪\`${{ steps.checkov.outcome }}\`
+          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            
           github.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
